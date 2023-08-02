@@ -1,0 +1,6 @@
+# Env file
+.env
+
+# Compiled executables
+main
+main.exe
