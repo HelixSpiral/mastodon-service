@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/mattn/go-mastodon"
@@ -62,8 +64,8 @@ func main() {
 		// Create mastodon client with provided credentials
 		c := mastodon.NewClient(&mastodon.Config{
 			Server:       "https://botsin.space",
-			ClientID:     mqttMsg.ClientID,
-			ClientSecret: mqttMsg.ClientSecret,
+			ClientID:     mqttMsg.MastodonClientID,
+			ClientSecret: mqttMsg.MastodonClientSecret,
 		})
 
 		// Authenticate
@@ -83,6 +85,24 @@ func main() {
 
 			log.Println(status)
 		}
-
 	}
+
+	// Setup the MQTT client with the options we set
+	mqttClient := mqtt.NewClient(options)
+
+	// Connect to the MQTT server
+	if token := mqttClient.Connect(); token.Wait() && token.Error() != nil {
+		panic(token.Error())
+	}
+	log.Println("Connected")
+
+	// Block indefinitely until something above errors, or we close out.
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt)
+	signal.Notify(sig, syscall.SIGTERM)
+
+	<-sig
+
+	log.Println("Signal caught -> Exit")
+	mqttClient.Disconnect(1000)
 }
