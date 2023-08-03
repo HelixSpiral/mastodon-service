@@ -61,6 +61,11 @@ func main() {
 			log.Fatal(err)
 		}
 
+		// Default to botsin.space if not provided.
+		if mqttMsg.MastodonServer == "" {
+			mqttMsg.MastodonServer = "https://botsin.space"
+		}
+
 		// Create mastodon client with provided credentials
 		c := mastodon.NewClient(&mastodon.Config{
 			Server:       "https://botsin.space",
