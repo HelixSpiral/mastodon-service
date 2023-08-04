@@ -61,6 +61,11 @@ func main() {
 			log.Fatal(err)
 		}
 
+		// If we get a message with no Mastodon info, ignore it
+		if mqttMsg.MastodonClientID == "" {
+			return
+		}
+
 		// Default to botsin.space if not provided.
 		if mqttMsg.MastodonServer == "" {
 			mqttMsg.MastodonServer = "https://botsin.space"
