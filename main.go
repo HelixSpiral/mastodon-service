@@ -52,14 +52,14 @@ func main() {
 		log.Println("Attempting to reconnect")
 	}
 	options.DefaultPublishHandler = func(_ mqtt.Client, m mqtt.Message) {
-		log.Printf("Received: %s->%s\n", m.Topic(), m.Payload())
-
 		// Unmarshal the received json into a struct
 		var mqttMsg MqttMessage
 		err := json.Unmarshal(m.Payload(), &mqttMsg)
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		log.Printf("Received: %s->%s\n", m.Topic(), mqttMsg.Message)
 
 		// If we get a message with no Mastodon info, ignore it
 		if mqttMsg.MastodonClientID == "" {
