@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -86,7 +87,8 @@ func main() {
 
 		// Define the base toot
 		mastodonToot := &mastodon.Toot{
-			Status: mqttMsg.Message,
+			Status: strings.ReplaceAll(mqttMsg.Message, "\\r\\n", `
+`),
 		}
 
 		// If we've been given an image, upload it and attach the media id to our toot
