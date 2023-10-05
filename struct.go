@@ -8,5 +8,5 @@ type MqttMessage struct {
 	MastodonPass         string
 
 	Message string
-	Image   string
+	Image   []byte
 }

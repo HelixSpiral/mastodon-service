@@ -84,17 +84,27 @@ func main() {
 			log.Fatal(err)
 		}
 
-		// TODO: Add image handling too
-		if mqttMsg.Image == "" {
-			status, err := c.PostStatus(context.Background(), &mastodon.Toot{
-				Status: mqttMsg.Message,
-			})
+		// Define the base toot
+		mastodonToot := &mastodon.Toot{
+			Status: mqttMsg.Message,
+		}
+
+		// If we've been given an image, upload it and attach the media id to our toot
+		if len(mqttMsg.Image) > 0 {
+			mediaAttachment, err := c.UploadMediaFromBytes(context.Background(), mqttMsg.Image)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			log.Println(status)
+			mastodonToot.MediaIDs = append(mastodonToot.MediaIDs, mediaAttachment.ID)
 		}
+
+		status, err := c.PostStatus(context.Background(), mastodonToot)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Println(status)
 	}
 
 	// Setup the MQTT client with the options we set
