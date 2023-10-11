@@ -8,5 +8,6 @@ type MqttMessage struct {
 	MastodonPass         string
 
 	Message string
-	Image   []byte
+	Image   []byte // Deprecated in favor of Images
+	Images  [][]byte
 }

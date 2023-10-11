@@ -91,14 +91,21 @@ func main() {
 `),
 		}
 
-		// If we've been given an image, upload it and attach the media id to our toot
+		// This is a temporary fix until we deprecate the MqttMessage.Image field in favor of the Images one.
 		if len(mqttMsg.Image) > 0 {
-			mediaAttachment, err := c.UploadMediaFromBytes(context.Background(), mqttMsg.Image)
-			if err != nil {
-				log.Fatal(err)
-			}
+			mqttMsg.Images = append(mqttMsg.Images, mqttMsg.Image)
+		}
 
-			mastodonToot.MediaIDs = append(mastodonToot.MediaIDs, mediaAttachment.ID)
+		// If we've been given images, upload them and attach the media id to our toot
+		if len(mqttMsg.Images) > 0 {
+			for _, image := range mqttMsg.Images {
+				mediaAttachment, err := c.UploadMediaFromBytes(context.Background(), image)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				mastodonToot.MediaIDs = append(mastodonToot.MediaIDs, mediaAttachment.ID)
+			}
 		}
 
 		status, err := c.PostStatus(context.Background(), mastodonToot)
