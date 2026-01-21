@@ -74,9 +74,9 @@ func main() {
 
 		// Create mastodon client with provided credentials
 		c := mastodon.NewClient(&mastodon.Config{
-			Server:       mqttMsg.MastodonServer,
-			ClientID:     mqttMsg.MastodonClientID,
-			ClientSecret: mqttMsg.MastodonClientSecret,
+			Server:       os.Getenv("MASTODON_SERVER"),
+			ClientID:     os.Getenv("MASTODON_CLIENT_ID"),
+			ClientSecret: os.Getenv("MASTODON_CLIENT_SECRET"),
 		})
 
 		// Authenticate
