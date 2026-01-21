@@ -1,18 +1,18 @@
-name: Publish Docker Image
-
-on:
-  push:
-    tags:
-      - 'v*'
-
-permissions:
-  contents: read
-  packages: write
-
-jobs:
-  Publish:
-    uses: HelixSpiral/reusable-workflows/.github/workflows/publish-docker.yml@v0.0.2
-    with:
-      registry: ghcr.io
-      image-name: helixspiral/mastodon-service
-      image-version: ${{ github.ref_name }}
+#name: Publish Docker Image
+#
+#on:
+#  push:
+#    tags:
+#      - 'v*'
+#
+#permissions:
+#  contents: read
+#  packages: write
+#
+#jobs:
+#  Publish:
+#    uses: HelixSpiral/reusable-workflows/.github/workflows/publish-docker.yml@v0.0.2
+#    with:
+#      registry: ghcr.io
+#      image-name: helixspiral/mastodon-service
+#      image-version: ${{ github.ref_name }}
