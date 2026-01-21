@@ -4,3 +4,6 @@
 # Compiled executables
 main
 main.exe
+
+# IDE stuff
+.idea/**

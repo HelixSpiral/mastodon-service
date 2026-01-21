@@ -1,0 +1,15 @@
+services:
+  servicename_replaceme:
+    image: mqtt-to-mastodon
+    container_name: servicename_replaceme
+    restart: unless-stopped
+    environment:
+      # once you change these values, do not commmit them to git
+      - MQTT_BROKER="replaceme"
+      - MQTT_CLIENT_ID="replaceme"
+      - MQTT_TOPIC="replaceme"
+      - MQTT_USERNAME="replaceme"
+      - MQTT_PASSWORD="replaceme"
+      - MASTODON_SERVER="replaceme"
+      - MASTODON_CLIENT_ID="replaceme"
+      - MASTODON_CLIENT_SECRET="replaceme"
