@@ -62,16 +62,6 @@ func main() {
 
 		log.Printf("Received: %s->%s\n", m.Topic(), mqttMsg.Message)
 
-		// If we get a message with no Mastodon info, ignore it
-		if mqttMsg.MastodonClientID == "" {
-			return
-		}
-
-		// Default to botsin.space if not provided.
-		if mqttMsg.MastodonServer == "" {
-			mqttMsg.MastodonServer = "https://botsin.space"
-		}
-
 		// Create mastodon client with provided credentials
 		c := mastodon.NewClient(&mastodon.Config{
 			Server:       os.Getenv("MASTODON_SERVER"),
