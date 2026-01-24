@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mastodon-service
+  labels:
+    app: mastodon-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mastodon-service
+  template:
+    metadata:
+      labels:
+        app: mastodon-service
+    spec:
+      containers:
+      - name: mastodon-service
+        image: ghcr.io/helixspiral/mastodon-service:v0.1.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MQTT_CLIENT_ID
+          value: mastodon-sub
+        - name: MQTT_BROKER
+          valueFrom:
+            configMapKeyRef:
+              name: mqttinfo
+              key: MQTT_BROKER
+        - name: MQTT_TOPIC
+          valueFrom:
+            configMapKeyRef:
+              name: mqttinfo
+              key: MQTT_TOPIC
+      imagePullSecrets:
+      - name: ghcr-credentials

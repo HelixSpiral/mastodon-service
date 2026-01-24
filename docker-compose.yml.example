@@ -4,7 +4,6 @@ services:
     container_name: servicename_replaceme
     restart: unless-stopped
     environment:
-      # once you change these values, do not commmit them to git
       - MQTT_BROKER="replaceme"
       - MQTT_CLIENT_ID="replaceme"
       - MQTT_TOPIC="replaceme"
@@ -13,3 +12,5 @@ services:
       - MASTODON_SERVER="replaceme"
       - MASTODON_CLIENT_ID="replaceme"
       - MASTODON_CLIENT_SECRET="replaceme"
+      - MASTODON_USERNAME="replaceme"
+      - MASTODON_PASSWORD="replaceme"

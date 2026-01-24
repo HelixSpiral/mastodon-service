@@ -7,3 +7,6 @@ main.exe
 
 # IDE stuff
 .idea/**
+
+# Docker
+docker-compose.yml

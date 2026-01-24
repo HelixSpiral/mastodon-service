@@ -21,10 +21,12 @@ func main() {
 	mqttUsername := os.Getenv("MQTT_USERNAME")
 	mqttPassword := os.Getenv("MQTT_PASSWORD")
 
-	// Mastodon config
-	mastoServer := os.Getenv("MASTODON_SERVER"),
-	mastoClientID:= os.Getenv("MASTODON_CLIENT_ID"),
-	mastoClientSecret:= os.Getenv("MASTODON_CLIENT_SECRET"),
+	// Default mastodon config, can still overwrite with ones in the mqtt message
+	mastoServer := os.Getenv("MASTODON_SERVER")
+	mastoClientID := os.Getenv("MASTODON_CLIENT_ID")
+	mastoClientSecret := os.Getenv("MASTODON_CLIENT_SECRET")
+	mastoUser := os.Getenv("MASTODON_USERNAME")
+	mastoPass := os.Getenv("MASTODON_PASSWORD")
 
 	// Setup the MQTT client options
 	options := mqtt.NewClientOptions().AddBroker(mqttBroker).SetClientID(mqttClientId)
@@ -58,50 +60,65 @@ func main() {
 		log.Println("Attempting to reconnect")
 	}
 	options.DefaultPublishHandler = func(_ mqtt.Client, m mqtt.Message) {
-// 		// Unmarshal the received json into a struct
-// 		var mqttMsg MqttMessage
-// 		err := json.Unmarshal(m.Payload(), &mqttMsg)
-// 		if err != nil {
-// 			log.Fatal(err)
-// 		}
+		// Unmarshal the received json into a struct
+		var mqttMsg MqttMessage
+		err := json.Unmarshal(m.Payload(), &mqttMsg)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		log.Printf("Received: %s->%s\n", m.Topic(), mqttMsg.Message)
 
-		// Create mastodon client with provided credentials
-		c := mastodon.NewClient(&mastodon.Config{
+		mastCfg := &mastodon.Config{
 			Server:       mastoServer,
 			ClientID:     mastoClientID,
 			ClientSecret: mastoClientSecret,
-		})
+		}
+
+		authUser := mastoUser
+		authPass := mastoPass
+
+		// If the message we received has specific credentials, use those instead of the default ones
+		if mqttMsg.MastodonServer != "" && mqttMsg.MastodonClientID != "" && mqttMsg.MastodonClientSecret != "" && mqttMsg.MastodonUser != "" && mqttMsg.MastodonPass != "" {
+			mastCfg.Server = mqttMsg.MastodonServer
+			mastCfg.ClientID = mqttMsg.MastodonClientID
+			mastCfg.ClientSecret = mqttMsg.MastodonClientSecret
+
+			authUser = mqttMsg.MastodonUser
+			authPass = mqttMsg.MastodonPass
+		}
+
+		// Create mastodon client with provided credentials
+		c := mastodon.NewClient(mastCfg)
 
 		// Authenticate
-		err = c.Authenticate(context.Background(), mastoClientID, mastoClientSecret)
+		err = c.Authenticate(context.Background(), authUser, authPass)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// Define the base toot
 		mastodonToot := &mastodon.Toot{
-			Status: strings.ReplaceAll(mqtt.Message, "\\r\\n", `
+			Status: strings.ReplaceAll(mqttMsg.Message, "\\r\\n", `
 `),
 		}
 
-// 		// This is a temporary fix until we deprecate the MqttMessage.Image field in favor of the Images one.
-// 		if len(mqttMsg.Image) > 0 {
-// 			mqttMsg.Images = append(mqttMsg.Images, mqttMsg.Image)
-// 		}
+		// This is a temporary fix until we deprecate the MqttMessage.Image field in favor of the Images one.
+		if len(mqttMsg.Image) > 0 {
+			mqttMsg.Images = append(mqttMsg.Images, mqttMsg.Image)
+		}
 
-// 		// If we've been given images, upload them and attach the media id to our toot
-// 		if len(mqttMsg.Images) > 0 {
-// 			for _, image := range mqttMsg.Images {
-// 				mediaAttachment, err := c.UploadMediaFromBytes(context.Background(), image)
-// 				if err != nil {
-// 					log.Fatal(err)
-// 				}
-//
-// 				mastodonToot.MediaIDs = append(mastodonToot.MediaIDs, mediaAttachment.ID)
-// 			}
-// 		}
+		// If we've been given images, upload them and attach the media id to our toot
+		if len(mqttMsg.Images) > 0 {
+			for _, image := range mqttMsg.Images {
+				mediaAttachment, err := c.UploadMediaFromBytes(context.Background(), image)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				mastodonToot.MediaIDs = append(mastodonToot.MediaIDs, mediaAttachment.ID)
+			}
+		}
 
 		status, err := c.PostStatus(context.Background(), mastodonToot)
 		if err != nil {
